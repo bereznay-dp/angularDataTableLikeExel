@@ -1,0 +1,73 @@
+
+  
+  <div class="form-group form-inline">
+    <label for="">&nbsp;Table Edit Mode : &nbsp;</label>
+    <button 
+   
+    [class]="editionMode ? 'btn btn-danger' : 'btn btn-primary'"
+    (click)="editionMode = !editionMode" >
+      <b>{{ editionMode ? "ON":"OFF" }}</b>
+    </button>
+  </div>
+
+  <ngx-datatable
+    #mydatatable
+    class="material"
+    [headerHeight]="50"
+    [limit]="pageSize"
+    [columnMode]="'force'"
+    [footerHeight]="50"
+    [rowHeight]="'auto'"
+    [rows]="rows"
+    [columns]="columns"
+
+    (page)='setPage($event)'
+      
+  >
+  <ngx-datatable-column *ngFor="let column of columns; let columnIndex = index " name="{{ column.name }}">
+    <ng-template *ngIf="column.type !== 'typehead'; else typeaheadTmpl" ngx-datatable-cell-template let-rowIndex="rowIndex" let-value="value" let-row="row">
+      <span
+        title="click to edit"
+        (click)="dataCellClick(event,rowIndex,column.name)"
+        *ngIf="!editing[rowIndex + '-' + column.name] || !editionMode">
+        {{value}}
+      </span>
+      <input
+      
+        class="editingInput"
+        appMyAutofocus
+        
+        *ngIf="editing[rowIndex+ '-' + column.name ] && editionMode"
+        type="{{ column.type }}"
+        [value]="value"
+
+        appKeyLisn
+        (goAwayTo)="onCellEditorKeyUp($event, rowIndex, column.name ,
+                                      columns[columnIndex-1]?columns[columnIndex-1].name:'null',
+                                      columns[columnIndex+1]?columns[columnIndex+1].name:'null')"
+        (blur)="onBlurHandler($event, column.name, rowIndex)"
+      />
+    </ng-template>
+    <ng-template #typeaheadTmpl>
+        <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-row="row" let-value="value">
+          <span
+            title="Double click to edit"
+            (click)="dataCellClick(event,rowIndex,column.name)"
+            *ngIf="!editing[rowIndex + '-typehead'] || !editionMode">
+            {{value}}
+          </span>
+          <app-data-cell-typehead *ngIf="editing[rowIndex + '-' + column.name] && editionMode"
+          [value]="value"
+          (editDataDone)="editDoneHandler($event, rowIndex, column.name ,
+                                            columns[columnIndex-1]?columns[columnIndex-1].name:'null',
+                                            columns[columnIndex+1]?columns[columnIndex+1].name:'null')"
+          >
+        </app-data-cell-typehead>
+          
+        </ng-template>
+    </ng-template>
+  </ngx-datatable-column>
+  </ngx-datatable>
+
+     
+  
